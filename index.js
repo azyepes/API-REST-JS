@@ -1,11 +1,11 @@
+// Usando Axios
+const api = axios.create({
+    baseURL: 'https://api.thedogapi.com/v1'
+})
+api.defaults.headers.common['X-API-KEY'] = '525d4c55-4b14-46fb-86c3-de1bc8ef71be'
+
 // URLs de la API
-const BASE_URL_RANDOM = 'https://api.thedogapi.com/v1/images/search';
-const BASE_URL_FAVORITES = 'https://api.thedogapi.com/v1/favourites';
 const BASE_URL_UPLOAD = 'https://api.thedogapi.com/v1/images/upload';
-const API_KEY = '525d4c55-4b14-46fb-86c3-de1bc8ef71be'
-const limit = 4
-const LIMIT_API = `limit=${limit}`
-let addToFavorite
 
 // Secciones de HTML para random y favorites dogs
 const randomDogs = document.getElementById('randomDogs')
@@ -21,20 +21,19 @@ async function myRandomDogs() {
     if (randomDogs.childElementCount !== 0) {
         cleaner(randomDogs)
     } else {
-        const response = await fetch(`${BASE_URL_RANDOM}?${LIMIT_API}`);
-        const randomData = await response.json();
+        const { data, status } = await api.get(`/images/search?limit=4`)
 
-        if (!response.status === 200) {
-            spanError.textContent = `Error ${response.status} ${data.message}`;
+        if (status !== 200) {
+            spanError.textContent = `Error ${status} ${data.message}`;
         } else {
             // ForEach para crear algunos elementos por cada imagen
-            randomData.forEach(element => {
+            data.forEach(element => {
             // Crear imagen
             let img = document.createElement('img');
             img.src = element.url;
 
             // crear botón para agregar a favoritos
-            addToFavorite = document.createElement('button');
+            let addToFavorite = document.createElement('button');
             addToFavorite.textContent = 'Add to Favorites';
             addToFavorite.setAttribute("id", "addToFavoriteButton");
 
@@ -51,31 +50,20 @@ async function myRandomDogs() {
         let favBtn = Array.from(document.querySelectorAll('#addToFavoriteButton'))
 
         for (let i = 0; i < favBtn.length; i++) {
-        let addId = randomData[i].id
+        let addId = data[i].id
         favBtn[i].addEventListener('click', function () { saveFavorites(addId) }, false)
         }
     }
-    
 }
 
 async function saveFavorites(id) {
 
-    const response = await fetch(`${BASE_URL_FAVORITES}?${API_KEY}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-API-KEY': API_KEY,
-        },
-        body: JSON.stringify({
-            image_id: id
-        }),
+    const { data, status } = await api.post('/favourites', {
+        image_id: id,
+    })
 
-    });
-
-    const data = await response.json()
-
-    if (response.status !== 200) {
-        spanError.textContent = `Error ${response.status} ${data.message}`;
+    if (status !== 200) {
+        spanError.textContent = `Error ${status} ${data.message}`;
     } 
     myFavoritesDogs();
 }
@@ -85,20 +73,15 @@ async function myFavoritesDogs() {
     if (favoritesDogs.childElementCount !== 0) {
         cleaner(favoritesDogs)
     } else {
-        const response = await fetch(`${BASE_URL_FAVORITES}`, {
-            method: 'GET',
-            headers: {
-                'X-API-KEY': API_KEY,
-            }
-        });
-        const favoriteData = await response.json();
+
+        const { data, status } = await api.get('/favourites')
     
-        if (response.status !== 200) {
-        spanError.textContent = `Error ${response.status}`;
+        if (status !== 200) {
+        spanError.textContent = `Error ${status} ${data.message}`;
         } 
         else {
             // ForEach para crear algunos elementos por cada imagen
-            favoriteData.forEach(element => {
+            data.forEach(element => {
 
             // Crear imagen
             let img = document.createElement('img');
@@ -124,7 +107,7 @@ async function myFavoritesDogs() {
         let removeBtn = Array.from(document.querySelectorAll('#removeFromFavoriteButton'))
 
         for (let i = 0; i < removeBtn.length; i++) {
-        let removeId = favoriteData[i].id
+        let removeId = data[i].id
         removeBtn[i].addEventListener('click', function () { removeFavorites(removeId) }, false) 
         }
     }
@@ -132,18 +115,10 @@ async function myFavoritesDogs() {
 
 async function removeFavorites(id) {
     
-    const response = await fetch(`${BASE_URL_FAVORITES}/${id}?${API_KEY}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-API-KEY': API_KEY,
-        },
-    })
-
-    const data = await response.json()
-
-    if (response.status !== 200) {
-        spanError.textContent = `Error ${response.status} ${data.message}`;
+    const { data, status } = await api.delete(`/favourites/${id}`)
+    
+    if (status !== 200) {
+        spanError.textContent = `Error ${status} ${data.message}`;
     } 
 
     myFavoritesDogs();
@@ -173,26 +148,23 @@ async function uploadDog() {
     
     const uploadForm = document.getElementById('uploadForm')
     const formData = new FormData(uploadForm)
-    console.log(formData.get(uploadForm));
     
     const response = await fetch(BASE_URL_UPLOAD, {
         method: 'POST',
         headers: {
             //'Content-Type': 'multipart/form-data',
-            'X-API-KEY': API_KEY,
+            'X-API-KEY': '525d4c55-4b14-46fb-86c3-de1bc8ef71be',
         },
         body: formData,
     })
 
     const data = await response.json()
 
+
     if (response.status !== 201) {
         spanError.innerHTML = `Hubo un error al subir michi: ${response.status} ${data.message}`
     }
     else {
-        //console.log("Foto de michi cargada :)");
-        //console.log({ data });
-        //console.log(data.url);
         saveFavorites(data.id) //para agregar el michi cargado a favoritos.
     }
 }

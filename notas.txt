@@ -1,0 +1,36 @@
+    // const response = await fetch(`${BASE_URL_FAVORITES}?${API_KEY}`, {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'X-API-KEY': API_KEY,
+    //     },
+    //     body: JSON.stringify({
+    //         image_id: id
+    //     }),
+
+    // });
+
+    // const data = await response.json()
+
+
+    // const response = await fetch(`${BASE_URL_FAVORITES}/${id}?${API_KEY}`, {
+    //     method: 'DELETE',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'X-API-KEY': API_KEY,
+    //     },
+    // })
+
+    // const data = await response.json()
+
+
+    // const response = await fetch(BASE_URL_UPLOAD, {
+    //     method: 'POST',
+    //     headers: {
+    //         //'Content-Type': 'multipart/form-data',
+    //         'X-API-KEY': API_KEY,
+    //     },
+    //     body: formData,
+    // })
+
+    // const data = await response.json()
