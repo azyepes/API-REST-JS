@@ -1,6 +1,7 @@
 // URLs de la API
 const BASE_URL_RANDOM = 'https://api.thedogapi.com/v1/images/search';
 const BASE_URL_FAVORITES = 'https://api.thedogapi.com/v1/favourites';
+const BASE_URL_UPLOAD = 'https://api.thedogapi.com/v1/images/upload';
 const API_KEY = '525d4c55-4b14-46fb-86c3-de1bc8ef71be'
 const limit = 4
 const LIMIT_API = `limit=${limit}`
@@ -9,6 +10,8 @@ let addToFavorite
 // Secciones de HTML para random y favorites dogs
 const randomDogs = document.getElementById('randomDogs')
 const favoritesDogs = document.getElementById('favoritesDogs')
+const reloadButton = document.getElementById('reload')
+const uploadButton = document.getElementById('uploadButton')
 
 // Manejo de errores
 const spanError = document.getElementById('error')
@@ -166,8 +169,36 @@ async function cleaner(section) {
     }
 }
 
+async function uploadDog() {
+    
+    const uploadForm = document.getElementById('uploadForm')
+    const formData = new FormData(uploadForm)
+    console.log(formData.get(uploadForm));
+    
+    const response = await fetch(BASE_URL_UPLOAD, {
+        method: 'POST',
+        headers: {
+            //'Content-Type': 'multipart/form-data',
+            'X-API-KEY': API_KEY,
+        },
+        body: formData,
+    })
 
-const reloadButton = document.getElementById('reload')
+    const data = await response.json()
+
+    if (response.status !== 201) {
+        spanError.innerHTML = `Hubo un error al subir michi: ${response.status} ${data.message}`
+    }
+    else {
+        //console.log("Foto de michi cargada :)");
+        //console.log({ data });
+        //console.log(data.url);
+        saveFavorites(data.id) //para agregar el michi cargado a favoritos.
+    }
+}
+
+
+uploadButton.addEventListener('click', uploadDog)
 reloadButton.addEventListener('click', myRandomDogs)
 myRandomDogs();
 myFavoritesDogs();
